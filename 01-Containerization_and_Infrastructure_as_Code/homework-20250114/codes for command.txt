@@ -1,0 +1,45 @@
+
+
+
+Homework edit notes:
+
+python ingest_data_homework.py --user=root --password=root --host=pgdatabase --port=5432 --db=ny_taxi --table_names yellow_taxi_trips lookup_table --urls https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-10.csv.gz https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv
+
+
+
+
+
+
+It only accept one argument value:
+1). edit ingest_data_home.py
+    parser.add_argument nargs='+', required=True, help='list of name of tables')
+2).edit yaml--shows below
+3).Rebuild the Docker container after modifying the docker-compose.yaml:
+GitBash: docker-compose up --build
+
+In .yaml
+    command:
+      - "--user=root"
+      - "--password=root"
+      - "--host=pgdatabase"
+      - "--port=5432"
+      - "--db=ny_taxi"
+      - "--table_names"
+      - "yellow_taxi_trips"
+      - "lookup_table"
+      - "--urls"
+      - "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-10.csv.gz"
+      - "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv"
+    depends_on:
+      - pgdatabase
+
+
+
+
+command: >
+      --user=root --password=root --host=pgdatabase --port=5432 --db=ny_taxi --table_names yellow_taxi_trips lookup_table --urls https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-10.csv.gz https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv 
+    depends_on:
+      - pgdatabase
+
+
+

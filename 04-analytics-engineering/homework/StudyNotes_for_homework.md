@@ -87,7 +87,8 @@ In Production (Last 30 Days): `dbt run --select fct_recent_taxi_trips --vars '{ 
      ``` pickup_datetime >= CURRENT_DATE - INTERVAL '{{ env_var("DAYS_BACK", var("days_back", "30")) }}' DAY ```
     
 ## Q3: dbt Data Lineage and Execution
-- Considering the data lineage below and that taxi_zone_lookup is the only materialization build (from a .csv seed file). Select the option that does NOT apply for materializing fct_taxi_monthly_zone_revenue: (A: dbt run --select models/staging/+)
+- Considering the data lineage below and that taxi_zone_lookup is the only materialization build (from a .csv seed file). Select the option that does NOT apply for materializing fct_taxi_monthly_zone_revenue: (A: dbt run --select models/staging/+) \
+![img](notesimages/01_01.png)
 
 `dbt run` :Runs all models in the project 
 `dbt run --select +models/core/dim_taxi_trips.sql+ --target prod` : Runs dim_taxi_trips.sql and its dependencies (parents & children). If fct_taxi_monthly_zone_revenue depends on dim_taxi_trips.sql, it will be included.

@@ -17,8 +17,17 @@ sources:
 - Uses Environment Variables (env_var) for Flexibility:
     - DBT_BIGQUERY_PROJECT → Specifies the BigQuery project (defaults to dtc_zoomcamp_2025 if not set).
     - DBT_BIGQUERY_SOURCE_DATASET → Defines the schema/dataset where raw data is stored (defaults to raw_nyc_tripdata).
-
-
+    - meaning: If DBT_BIGQUERY_PROJECT is set → dbt will use its value. \
+      If DBT_BIGQUERY_PROJECT is not set → dbt will use 'dtc_zoomcamp_2025' as the default value. \
+      The same applies to DBT_BIGQUERY_SOURCE_DATASET, which defaults to 'raw_nyc_tripdata2'.
+- How to set Environment Variables?
+    - Method 1: Linux/MacOS (Bash/Zsh) `export DBT_BIGQUERY_PROJECT=my_project`
+    - Method 2: Windows(PowerShell) `$env:DBT_BIGQUERY_PROJECT="my_project"`
+    - Method 3: .env File (if using dbt Cloud or dotenv), in this .env file: DBT_BIGQUERY_PROJECT=my_project
+- Why use env_var?
+  Makes it configurable across different environments (e.g., dev, staging, prod). \
+  Prevents hardcoding project/schema names. \
+  Allows you to set values via the command line or .env files.
 
 ## Q
 - Select the option that does NOT apply for materializing fct_taxi_monthly_zone_revenue: (A: dbt run --select models/staging/+)
@@ -72,7 +81,16 @@ running `dbt run --target prod` will automatically process 30 days, and running 
 In Development (Last 7 Days): `dbt run --select fct_recent_taxi_trips`
 In Production (Last 30 Days): `dbt run --select fct_recent_taxi_trips --vars '{ "trip_days": 30 }'`
 
-- or pickup_datetime >= CURRENT_DATE - INTERVAL '{{ var("days_back", env_var("DAYS_BACK", "30")) }}' DAY
+- explanation of options
+``` pickup_datetime >= CURRENT_DATE - INTERVAL '{{ var("days_back", env_var("DAYS_BACK", "30")) }}' DAY ``` \
+  - Command-line arguments (--vars) take precedence → var("days_back", …)
+    - If not set, it checks the environment variable (DAYS_BACK) → env_var("DAYS_BACK", …)
+    - If neither is provided, it defaults to 30 days
+  - How Precedence Works:
+    - If dbt run --vars '{ "days_back": 7 }' is used → days_back = 7
+    - If no --vars is provided but DAYS_BACK=15 is set in the environment → days_back = 15
+    - If neither is set → defaults to 30
 
 
+## Q
 

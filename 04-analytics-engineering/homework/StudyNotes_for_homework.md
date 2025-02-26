@@ -161,6 +161,14 @@ How does macro work in dbt?
 Quarterly YoY (Year-over-Year) revenue growth: \
 e.g.: In 2020/Q1, Green Taxi had -12.34% revenue growth compared to 2019/Q1 \
 e.g.: In 2020/Q4, Yellow Taxi had +34.56% revenue growth compared to 2019/Q4 \
+
+QUERY in BigQUERY for Q5:
+```
+SELECT service_type, year_quarter, yoy_growth_percentage FROM `fluid-vector-445118-g3.trips_dbt_tliu.fct_taxi_trips_quarterly_revenue` 
+WHERE year = 2020
+ORDER BY service_type, yoy_growth_percentage
+```
+
 ## Q6 P97/P95/P90 Taxi Monthly Fare
 ### continuous percentiles
 continuous percentiles: refers to a percentile calculation that interpolates between values rather than just picking a specific value from the dataset. This is in contrast to a discrete percentile, which selects an actual observed value from the dataset. (连续百分位数 指的是一种通过插值（interpolation）计算的百分位数方法，而不是简单地从数据集中选取一个具体值。它相比**离散百分位数（Discrete Percentile）**更加平滑，能够提供更精确的估算，尤其适用于数据点较少或分布不均匀的情况。) \
@@ -244,6 +252,11 @@ Keeps all individual rows but adds a column with percentile values.	Useful when 
 Window Function (OVER()):	Keeps all individual rows but adds a column with percentile values.	Useful when you need percentile values alongside raw data.
 GROUP BY: Approach	Aggregates data, returning only one row per group.	Best for summarizing results by group.
 
+QUERY in BigQUERY for Q6:
+```
+SELECT DISTINCT service_type, fare_p97, fare_p95, fare_p90  FROM `fluid-vector-445118-g3.trips_dbt_tliu.fct_taxi_trips_monthly_fare_p95` 
+WHERE year = 2020 and month =4
+```
 ## Q7 Top #Nth longest P90 travel time Location for FHV
 
 The Dispatching Base License Number typically refers to a unique identifier assigned to a taxi, ride-hailing, or livery service base by a regulatory authority, such as the Taxi and Limousine Commission (TLC) in New York City. \
@@ -259,4 +272,25 @@ SELECT * FROM cte1 WHERE rn=1
 --row_number(): Assigns a unique row number to each row within a partition. Starts from 1 for each partition.
 -- (vendorid, pickup_datetime) is surrogate_key
 -- Used to deduplicate data
+```
+
+QUERY in BigQUERY for Question7:
+```
+SELECT DISTINCT dropoff_zone, p90 FROM `fluid-vector-445118-g3.trips_dbt_tliu.fct_fhv_monthly_zone_traveltime_p90` 
+WHERE pickup_zone ='Newark Airport'
+  AND year = 2019 and month = 11
+ORDER BY p90 DESC
+LIMIT 2;
+
+SELECT DISTINCT dropoff_zone, p90 FROM `fluid-vector-445118-g3.trips_dbt_tliu.fct_fhv_monthly_zone_traveltime_p90` 
+WHERE pickup_zone ='SoHo'
+  AND year = 2019 and month = 11
+ORDER BY  p90 DESC
+LIMIT 2;
+
+SELECT DISTINCT dropoff_zone, p90 FROM `fluid-vector-445118-g3.trips_dbt_tliu.fct_fhv_monthly_zone_traveltime_p90` 
+WHERE pickup_zone = 'Yorkville East'
+  AND year = 2019 and month = 11
+ORDER BY p90 DESC
+LIMIT 2;
 ```

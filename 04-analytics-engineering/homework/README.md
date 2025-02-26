@@ -1,7 +1,7 @@
 ### Steps:
 1. upload data to GCP buckets
 2. BigQuery Create three tables 
-3. dbt
+3. develop my dbt project in dbt cloud
 
 
 ### Step 1:

@@ -1,3 +1,9 @@
+```
+dbt run --select stg_fhv_tripdata --vars '{'is_test_run': 'false'}'
+dbt build --vars '{'is_test_run': 'false'}'
+```
+
+
 ## Q1: understanding dbt model resolution
 ### meaning of sources.yaml
 -This sources.yaml defines a source in dbt, specifically for BigQuery, __allowing dbt to reference raw data in the BigQuery__ data warehouse. \

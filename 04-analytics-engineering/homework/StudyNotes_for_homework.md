@@ -88,7 +88,7 @@ In Production (Last 30 Days): `dbt run --select fct_recent_taxi_trips --vars '{ 
     
 ## Q3: dbt Data Lineage and Execution
 - Considering the data lineage below and that taxi_zone_lookup is the only materialization build (from a .csv seed file). Select the option that does NOT apply for materializing fct_taxi_monthly_zone_revenue: (A: dbt run --select models/staging/+) \
-![img](notesimages/01_01.png)
+![img](NotesImages/01_01.png)
 
 `dbt run` :Runs all models in the project 
 `dbt run --select +models/core/dim_taxi_trips.sql+ --target prod` : Runs dim_taxi_trips.sql and its dependencies (parents & children). If fct_taxi_monthly_zone_revenue depends on dim_taxi_trips.sql, it will be included.
@@ -96,10 +96,167 @@ In Production (Last 30 Days): `dbt run --select fct_recent_taxi_trips --vars '{ 
 `dbt run --select +models/core/` :Runs all models inside models/core/, which includes fct_taxi_monthly_zone_revenue.
 `dbt run --select models/staging/+` :runs only models inside models/staging/ and their children. If fct_taxi_monthly_zone_revenue is in models/core/, it won't be included unless it depends directly on staging models.
 
-- What are dependencies?  parents & children?
+- What are dependencies?  parents & children? \
+  dependencies refer to the relationships between models:
+    - Parent models(Upstream Dependencies): A parent is a model that another model depends on.
+    - Child models(Downstream Dependencies): A child is a model that depends on another model.
+  
+## Q4: dbt Macros and Jinja
+Consider you're dealing with sensitive data (e.g.: PII), that is only available to your team and very selected few individuals, in the raw layer of your DWH (e.g: a specific BigQuery dataset or PostgreSQL schema),
+  - Among other things, you decide to obfuscate/masquerade that data through your staging models, and make it available in a different schema (a staging layer) for other Data/Analytics Engineers to explore
+  - And optionally, yet another layer (service layer), where you'll build your dimension (dim_) and fact (fct_) tables (assuming the Star Schema dimensional modeling) for Dashboarding and for Tech Product Owners/Managers \
+You decide to make a macro to wrap a logic around it: \
+```
+{% macro resolve_schema_for(model_type) -%}
 
+    {%- set target_env_var = 'DBT_BIGQUERY_TARGET_DATASET'  -%}
+    {%- set stging_env_var = 'DBT_BIGQUERY_STAGING_DATASET' -%}
 
+    {%- if model_type == 'core' -%} {{- env_var(target_env_var) -}}
+    {%- else -%}                    {{- env_var(stging_env_var, env_var(target_env_var)) -}}
+    {%- endif -%}
 
+{%- endmacro %}
+``` 
+And use on your staging, dim_ and fact_ models as:
+```
+{{ config(
+    schema=resolve_schema_for('core'), 
+) }}
+``` 
+### Notes for Q4: 
+In dbt (Data Build Tool), __a macro is a reusable piece of SQL or Jinja code__ that allows you to eliminate duplication and enhance modularity in your dbt projects. Macros work similarly to __functions__ in programming languages—they take arguments, process them, and return a result.
+How does macro work in dbt?
+  - Macros are written in Jinja \
+    dbt uses the Jinja templating engine to define macros. \
+    Macros can contain SQL and Jinja expressions.
+  - Defining a Macro \
+    Macros are stored in .sql files inside the macros/ directory.
+    A macro is defined using the {% macro macro_name(arguments) %} syntax.
+  - Calling a Macro \
+    Macros can be invoked using {{ macro_name(arguments) }} inside models or other macros.
+  - example:
+      - Define the Macro(macros/my_macros.sql)
+         ```
+         {% macro add_numbers(a, b) %}
+            {{ a + b }}
+          {% endmacro %}
+         ```
+      - Using the Macro in a Model (models/example.sql)
+        ``` SELECT {{ add_numbers(3, 5) }} AS sum_result; ```
 
-## Q
+## Q5 Taxi Quarterly Revenue Growth (Note LAG(..) OVER (ORDER BY service_type, year_quarter))
+    Common Table Expression (CTE) syntax:  ( `with cte1 as(), cte2 as(), ...`)
 
+    EXTRACT(YEAR FROM pickup_datetime) AS year,
+    EXTRACT(QUARTER FROM pickup_datetime) AS quarter,
+    EXTRACT(MONTH FROM pickup_datetime) AS month,
+    CONCAT(EXTRACT(YEAR FROM pickup_datetime), '-Q', EXTRACT(QUARTER FROM pickup_datetime)) AS year_quarter
+
+    LAG(revenue, 4) OVER (ORDER BY service_type, year_quarter) AS prev_year_revenue
+
+    ROUND(100 * (revenue - prev_year_revenue) / NULLIF(prev_year_revenue, 0), 2) 
+    AS yoy_growth_percentage
+
+Quarterly YoY (Year-over-Year) revenue growth: \
+e.g.: In 2020/Q1, Green Taxi had -12.34% revenue growth compared to 2019/Q1 \
+e.g.: In 2020/Q4, Yellow Taxi had +34.56% revenue growth compared to 2019/Q4 \
+## Q6 P97/P95/P90 Taxi Monthly Fare
+### continuous percentiles
+continuous percentiles: refers to a percentile calculation that interpolates between values rather than just picking a specific value from the dataset. This is in contrast to a discrete percentile, which selects an actual observed value from the dataset. (连续百分位数 指的是一种通过插值（interpolation）计算的百分位数方法，而不是简单地从数据集中选取一个具体值。它相比**离散百分位数（Discrete Percentile）**更加平滑，能够提供更精确的估算，尤其适用于数据点较少或分布不均匀的情况。) \
+How to compute the 95th percentile?\
+假设 fare_amount 数据按升序排列如下：
+[5, 10, 15, 20, 25, 30, 35, 40, 45, 50] \
+The 95th percentile index(95% 的位置)是 (0.95 * (10 - 1) + 1) = 9.55，位于 第9个值（45）和第10个值（50）之间。\
+The continuous percentile interpolates(连续百分位数计算)： 45+(50−45)∗0.55=47.75 \
+A discrete percentile(离散百分位数)可能直接返回 45 或 50。
+
+What is a percentile calculation? \
+A percentile calculation is a way of determining the relative position of a value within a dataset by dividing the data into 100 equal parts. It helps to understand the distribution of data 
+
+fare_amount: 一般表示 乘客支付的基本车费
+如果一趟出租车行程的总费用明细如下：
+基础车费（fare_amount）: $20.00
+附加费（surcharge）: $2.50
+小费（tip_amount）: $3.00
+总支付金额（total_amount）: $25.50
+我们通常用 fare_amount 来分析车费分布、计算百分位数（P95）、优化定价模型等
+
+### sql code to Computing the 95th continuous percentile within each (service_type, year, month) group 
+Calculate the 95th percentile by linearly interpolating between the two closest fare amounts if needed. 
+
+#### Using a window function 
+Keeps all individual rows but adds a column with percentile values.	Useful when you need percentile values alongside raw data.
+- Corrected code
+  ```
+  SELECT service_type, year, month,    
+      PERCENTILE_CONT(fare_amount, 0.95) 
+          OVER (PARTITION BY service_type, year, month) AS fare_p95    
+  FROM filtered_trips
+  ```
+  SELECT DISTINCT service_type, year, month, fare_p95 FROM ... \
+  Explanation: \
+  PERCENTILE_CONT(fare_amount, 0.95): calculates the 95th percentile of the fare_amount. \
+  PARTITION BY service_type, year, month: Partitions the dataset by service_type, year, and month. Ensures that the percentile calculation is performed separately for each unique combination of these fields. \
+  Partitioning means splitting your data into smaller groups based on the values in the specified columns (service_type, year, and month in this case). \
+  OVER (PARTITION BY service_type, year, month): Allows the percentile to be computed over partitions while keeping all rows intact.
+  
+- ERROR codes(Big QUERY doesn't support)
+  ```
+  --Syntax ERORR: In BIG QUERY, PERCENTILE_CONT() doesn't support WITHIN GROUP
+  --In BigQuery, the WITHIN GROUP clause is not supported for PERCENTILE_CONT
+  -- in the same way it is in some other SQL databases
+  -- you'll need to structure it without WITHIN GROUP in the window context.
+  SELECT service_type, year, month, fare_amount,
+      PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY fare_amount) 
+          OVER (PARTITION BY service_type, year, month) AS fare_p95
+  FROM filtered_trips  
+  ```
+  Explanation
+  PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY fare_amount): Computes the continuous 95th percentile  (i.e., the fare amount below which 95% of the fares fall).
+  Why use WINTHIN GROUP here？\
+  It allows you to define how data is ordered before applying the function, ensuring that the percentile or statistic is calculated in the correct order.\
+  It gives flexibility in handling more complex aggregate statistics that involve sorting or interpolating between data points.
+
+#### Using GROUP BY --ERROE in BIGQUERY
+- ERROR codes(BIG QUERY doesn't support)
+  - ERROR1: PERCENTILE_CONT() doesn't support WITHIN GROUP
+  ```
+  SELECT service_type, year, month,
+      PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY fare_amount) AS fare_p95
+  FROM filtered_trips
+  GROUP BY service_type, year, month
+  ```
+  - ERROR2: In BigQUERY, percentile_cont aggregate function is not supported. 
+  ```  
+  SELECT service_type, year, month,
+      PERCENTILE_CONT(fare_amount, 0.97) AS fare_p97
+  FROM filtered_trips
+  GROUP BY service_type, year, month
+  ```
+  - ERROR3: SELECT list expression references column service_type which is neither grouped nor aggregated
+  ```
+  SELECT service_type, year, month,
+    PERCENTILE_CONT(fare_amount, 0.97) AS fare_p97
+  FROM filtered_trips
+  ```
+- Extra(not for BigQuery): Key Difference Between WINDOW FUNCTION and GROUP BY Approach \
+Window Function (OVER()):	Keeps all individual rows but adds a column with percentile values.	Useful when you need percentile values alongside raw data.
+GROUP BY: Approach	Aggregates data, returning only one row per group.	Best for summarizing results by group.
+
+## Q7 Top #Nth longest P90 travel time Location for FHV
+
+The Dispatching Base License Number typically refers to a unique identifier assigned to a taxi, ride-hailing, or livery service base by a regulatory authority, such as the Taxi and Limousine Commission (TLC) in New York City. \
+It identifies the base station or company that a for-hire vehicle (FHV), taxi, or livery car is affiliated with. The base is responsible for dispatching trips to drivers.（用于标识某辆车所属的派遣基地（即网约车公司、出租车公司等）。该基地负责调度车辆并派发订单给司机。 ）
+
+```
+WITH cte1 AS(
+  SELECT *， row_number() over(partition by CAST(vendorid AS INT64), pickup_datetime) as rn
+  FROM trip_data
+)
+SELECT * FROM cte1 WHERE rn=1
+
+--row_number(): Assigns a unique row number to each row within a partition. Starts from 1 for each partition.
+-- (vendorid, pickup_datetime) is surrogate_key
+-- Used to deduplicate data
+```

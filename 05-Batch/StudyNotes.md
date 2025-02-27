@@ -12,6 +12,7 @@ Hadoop → Not always required, but needed if you want to use HDFS (Hadoop Distr
 - Hadoop (HDFS, YARN) does not work well on Windows.\
 - You'll need WSL (Windows Subsystem for Linux) or a Linux VM for a proper cluster setup.\
 ![img](images/05_02.png) \
+
 ### 4. difference between WSL and linux VM?
 Both WSL (Windows Subsystem for Linux) and a Linux VM (Virtual Machine) allow you to run Linux on Windows, but they work differently and have different use cases.
 #### WSL (Windows Subsystem for Linux)
@@ -23,6 +24,8 @@ Both WSL (Windows Subsystem for Linux) and a Linux VM (Virtual Machine) allow yo
 - How to install WSL(Ubuntu)?
 Powershell: `wsl --install -d Ubuntu-22.04`\
 Then, open Ubuntu from the Start Menu and start using Linux!
+- list installed WSL distributions: \
+  Bash `wsl --list --verbose`
 #### a Linux VM
 - A Linux Virtual Machine (VM) is a fully virtualized Linux OS running inside Windows.
     - Requires __VirtualBox or VMware__ to create a virtual environment.
@@ -48,3 +51,38 @@ Then, open Ubuntu from the Start Menu and start using Linux!
 #### Which one should you use?
 ✅ Use Git Bash if you just need Git & Bash commands for simple tasks.
 ✅ Use WSL if you need a real Linux system with apt, Python, Spark, Docker, etc.
+
+### 6. How to access files in windows Desktop from Ubuntu command line
+I have WSL and Git Bash installed in my windows laptop.
+- In WSL(or Ubuntu) Command Line: 
+```
+momotina18@Ting-Dell-Laptop:~$ cd ~
+momotina18@Ting-Dell-Laptop:~$ pwd
+/home/momotina18
+```
+- In Git Bash Command Line:
+```
+tliu1@Ting-Dell-Laptop MINGW64 ~/Desktop
+$ pwd
+/c/Users/tliu1/Desktop
+```
+- How to access tliu1/Desktop in Ubuntu Command Line?
+```
+momotina18@Ting-Dell-Laptop:~$ cd /mnt/c/Users/tliu1/Desktop
+momotina18@Ting-Dell-Laptop:/mnt/c/Users/tliu1/Desktop$ pwd
+/mnt/c/Users/tliu1/Desktop
+momotina18@Ting-Dell-Laptop:/mnt/c/Users/tliu1/Desktop$ cd ~
+momotina18@Ting-Dell-Laptop:~$ pwd
+/home/momotina18
+```
+- Summary
+In Ubuntu:
+    - Linux home directory: /home/momotina18
+    - cd Windows home directory: cd /mnt/c/Users/tliu1
+In Git Bash:\
+    - Windows home directory: /c/Users/tliu1
+    - cd Linux home directory: cd //wsl$/Ubuntu/home/momotina18          
+        - Using `\\wsl$`: Best way to access WSL file system from Windows applications like Git Bash. 
+        - The absolute path is usually(similar to): \    /mnt/c/Users/yourubuntuusername/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu_1804onWindows_79rhkp1fndgsc/LocalState/rootfs/home/yourubuntuusername
+            - In this path: /mnt/c/    represents the C: drive in Windows. \
+              The rest of the path is the location of your Ubuntu file system from within WSL \ 

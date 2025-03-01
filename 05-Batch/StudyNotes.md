@@ -1,4 +1,11 @@
 
+### Table of Content
+-[About Setup for Spark](#about-setup-for-spark)
+-[Notes for Homework](#notes-for-homework)
+
+
+
+## About Setup for Spark
 ### 1.what will hapeen when I installed pyspark only？
 - I installed pyspark only via `pip install pyspark` in my conda env. and set JAVA_HOME.... in this conda env file(See more details in folder about `Databricks SPARK Certification`). \
 Only Basic Spark execution works(Standalone mode) \
@@ -122,4 +129,4 @@ In Git Bash:\
     /mnt/c/Users/tliu1
   ```
 
-
+## Notes for Homework

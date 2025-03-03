@@ -131,7 +131,8 @@ In Git Bash:\
 
 ## Notes for Homework
 ### Installing/Running Spark in the Cloud(GCP VM)
-- Steps: __see notes2_boisalai_de-zoomcamp-2023   5.2.1__
+- Steps: __see notes2_boisalai_de-zoomcamp-2023   5.2.1__\
+      https://github.com/boisalai/de-zoomcamp-2023/blob/main/week5.md
     - Start a VM instances on Google Cloud
     - Install Spark on this VM(Linux)
     - Use Remote-SSH extension in VSCode to forward a port from this remote machine to local.

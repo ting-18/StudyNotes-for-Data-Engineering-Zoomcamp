@@ -1,7 +1,23 @@
 
 ### Table of Content
-- [About Setup for Spark](#about-setup-for-spark)
 - [Notes for Homework](#notes-for-homework)
+- [About Setup for Spark](#about-setup-for-spark)
+- 
+
+
+## Notes for Homework
+### Installing/Running Spark in the Cloud(GCP VM)
+- Steps: __see notes2_boisalai_de-zoomcamp-2023   5.2.1__\
+      https://github.com/boisalai/de-zoomcamp-2023/blob/main/week5.md
+    - Start a VM instances on Google Cloud
+    - Install Spark on this VM(Linux)
+    - Use Remote-SSH extension in VSCode to forward a port from this remote machine to local.
+### Review Spark SQL， Spark DataFrames, Spark DataFrame functions(GroupBy, Joins), RDD, repartition...
+
+### Connecting to Google Cloud Storage and Big Query
+__See notes2_boisalai_de-zoomcamp-2023   5.6.1 and 5.6.4__
+
+
 
 
 
@@ -129,17 +145,6 @@ In Git Bash:\
     /mnt/c/Users/tliu1
   ```
 
-## Notes for Homework
-### Installing/Running Spark in the Cloud(GCP VM)
-- Steps: __see notes2_boisalai_de-zoomcamp-2023   5.2.1__\
-      https://github.com/boisalai/de-zoomcamp-2023/blob/main/week5.md
-    - Start a VM instances on Google Cloud
-    - Install Spark on this VM(Linux)
-    - Use Remote-SSH extension in VSCode to forward a port from this remote machine to local.
-### Review Spark SQL， Spark DataFrames, Spark DataFrame functions(GroupBy, Joins), RDD, repartition...
-
-### Connecting to Google Cloud Storage and Big Query
-__See notes2_boisalai_de-zoomcamp-2023   5.6.1 and 5.6.4__
 
 
 

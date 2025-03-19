@@ -8,20 +8,20 @@
 
 ``` $ cd 06-streaming/pyflink ```
 1. Add pgAdmin service into docker-compose.yml file.  And I run this without installing make.
-2. Build the Docker image and deploy the services in the docker-compose.yml file
-``` $ docker compose up --build --remove-orphans  -d ```
+2. Build the Docker image and deploy the services in the docker-compose.yml file \
+``` $ docker compose up --build --remove-orphans  -d ``` \
 After the image is built, Docker will automatically start up the job manager and task manager services.
 
-Flink UI: http://localhost:8081/   to see the Flink Job Manager
+Flink UI: http://localhost:8081/   to see the Flink Job Manager  \
 Connect to Postgres with pgcli, pg-admin, DataGrip(install,not-free), DBeaver or any other tool.
 
-The connection credentials are:
+The connection credentials are: \
 Username postgres
 Password postgres
 Database postgres
 Host localhost
 Port 5432
-With pgcli, you'll need to run this to connect:
+With pgcli, you'll need to run this to connect: \
 ```bash
     $ pip install pgcli
     $ pgcli -h localhost -p 5432 -u postgres -d postgres

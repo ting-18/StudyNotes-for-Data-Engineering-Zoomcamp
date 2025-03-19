@@ -170,13 +170,16 @@ In real-time streaming, events may arrive late due to network delays or out-of-o
   	  •	Event 3: pickup_time = 10:05:00\
   	  •	Event 4: pickup_time = 10:02:00 (late event), but arrives at 10:06:00\
   	  •	Event 5: pickup_time = 10:10:00\
-	- Watermark Progression:\
-	Wall Clock Time	Event Processed	Watermark\
-|10:00:00	|Event 1 (10:00)	|09:59:55|
-|10:01:00	|Event 2 (10:01)	|10:00:55|
-|10:05:00	|Event 3 (10:05)	|10:04:55|
-|10:06:00	|Event 4 (10:02)	|Dropped|
-|10:10:00	|Event 5 (10:10)	|10:09:55|
+	- Watermark Progression: \
+ 
+|Wall Clock Time| Event Processed| Watermark|
+|---------------|----------------|----------|
+| 10:00:00 | Event 1 (10:00) | 09:59:55 |
+| 10:01:00 | Event 2 (10:01) | 10:00:55 |
+| 10:05:00 | Event 3 (10:05) | 10:04:55 |
+| 10:06:00 | Event 4 (10:02) | Dropped |
+| 10:10:00 | Event 5 (10:10) | 10:09:55 |
+
 •	Watermark at 10:05: By the time Event 4 (with pickup_time = 10:02) arrives at 10:06, the watermark has already passed 10:05, so Event 4 is considered too late.\
 •	Flink drops Event 4 and will not process it in real-time streams.\
 Why Does Flink Drop Late Events?\

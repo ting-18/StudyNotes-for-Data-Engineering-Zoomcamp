@@ -51,12 +51,12 @@ SELECT COUNT(*) FROM processed_events;
 5. Run the PyFlink job!  
 ```bash    $ docker-compose exec jobmanager ./bin/flink run -py ../src/job/start_job.py -d ```
 
-```bash    $ python src/producers/producer.py ```
+```bash    $ python src/producers/producer.py ``` \
 Check table row numbers in Postgres: ``` SELECT COUNT(*) FROM processed_events; ```  (row number raising)
 
 Flink UI: http://localhost:8081/    Check Chekpoints.
 
-(All the above is talking about how to run insert into, select, start, with Flink)
+__(All the above is talking about how to run insert into, select, start, with Flink)__
 
 6. groupby --src/job/aggregation.py
 

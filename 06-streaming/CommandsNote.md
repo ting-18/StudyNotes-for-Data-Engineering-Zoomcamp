@@ -21,6 +21,7 @@ Password postgres
 Database postgres
 Host localhost
 Port 5432
+
 With pgcli, you'll need to run this to connect: \
 ```bash
     $ pip install pgcli
